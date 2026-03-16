@@ -40,18 +40,17 @@ export default function AppSidebar({ isDarkTheme, onSelectChat, activeChatId }: 
   const activeClass = isDarkTheme ? 'bg-purple-500/25 border-purple-400/40' : 'bg-cyan-100 border-cyan-300'
 
   const ChatItem = ({ item }: { item: ChatHistoryItem }) => (
-    <button
+    <div
       onClick={() => onSelectChat?.(item.id)}
-      className={`w-full text-left px-3 py-2.5 rounded-xl border transition-all duration-200 group mb-1 ${
-        activeChatId === item.id
-          ? activeClass
-          : `border-transparent ${itemHover}`
-      }`}
+      className={`w-full text-left px-3 py-2.5 rounded-xl border transition-all duration-200 group mb-1 ${activeChatId === item.id
+        ? activeClass
+        : `border-transparent ${itemHover}`
+        }`}
     >
       <div className="flex items-start justify-between">
-        <div className="flex items-center min-w-0">
+        <div className="flex items-center min-w-0 flex-1">
           <MessageSquare className={`w-4 h-4 mr-2 flex-shrink-0 ${isDarkTheme ? 'text-purple-400' : 'text-cyan-500'}`} />
-          <div className="min-w-0">
+          <div className="min-w-0 pr-2">
             <p className={`text-sm font-medium truncate ${isDarkTheme ? 'text-gray-200' : 'text-gray-800'}`}>
               {item.title}
             </p>
@@ -62,9 +61,8 @@ export default function AppSidebar({ isDarkTheme, onSelectChat, activeChatId }: 
         </div>
         <button
           onClick={e => e.stopPropagation()}
-          className={`flex-shrink-0 ml-1 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity ${
-            isDarkTheme ? 'hover:bg-red-500/20 text-gray-500 hover:text-red-400' : 'hover:bg-red-100 text-gray-400 hover:text-red-500'
-          }`}
+          className={`flex-shrink-0 ml-1 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity ${isDarkTheme ? 'hover:bg-red-500/20 text-gray-500 hover:text-red-400' : 'hover:bg-red-100 text-gray-400 hover:text-red-500'
+            }`}
         >
           <Trash2 className="w-3 h-3" />
         </button>
@@ -73,7 +71,7 @@ export default function AppSidebar({ isDarkTheme, onSelectChat, activeChatId }: 
         <Clock className="w-3 h-3 mr-1" />
         {item.timestamp}
       </div>
-    </button>
+    </div>
   )
 
   const SectionToggle = ({
@@ -89,9 +87,8 @@ export default function AppSidebar({ isDarkTheme, onSelectChat, activeChatId }: 
   }) => (
     <button
       onClick={onToggle}
-      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg mb-1 transition-colors ${
-        isDarkTheme ? 'text-gray-400 hover:text-gray-200 hover:bg-white/5' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-      }`}
+      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg mb-1 transition-colors ${isDarkTheme ? 'text-gray-400 hover:text-gray-200 hover:bg-white/5' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+        }`}
     >
       <div className="flex items-center space-x-2">
         {icon}
@@ -107,11 +104,10 @@ export default function AppSidebar({ isDarkTheme, onSelectChat, activeChatId }: 
       <div className={`p-4 border-b ${border}`}>
         <button
           onClick={() => onSelectChat?.('new')}
-          className={`w-full py-2.5 px-4 rounded-xl text-sm font-medium transition-all duration-200 ${
-            isDarkTheme
-              ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700 shadow-lg'
-              : 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:from-cyan-600 hover:to-blue-700 shadow-lg'
-          }`}
+          className={`w-full py-2.5 px-4 rounded-xl text-sm font-medium transition-all duration-200 ${isDarkTheme
+            ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700 shadow-lg'
+            : 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:from-cyan-600 hover:to-blue-700 shadow-lg'
+            }`}
         >
           + New Chat
         </button>

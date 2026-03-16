@@ -3,36 +3,31 @@
 import React, { useState, useEffect } from "react";
 
 interface LoginProps {
-  onLogin: (email: string, password: string) => void
-  onShowSignup: () => void
+  onLogin: (userid: string, password: string) => void
 }
 
-const Login = ({ onLogin, onShowSignup }: LoginProps) => {
-  const [captcha, setCaptcha] = useState("");
-  const [userCaptcha, setUserCaptcha] = useState("");
-  const [email, setEmail] = useState("");
+const Login = ({ onLogin }: LoginProps) => {
+  const [userid, setUserid] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const generateCaptcha = () => {
-    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-    let result = "";
-    for (let i = 0; i < 6; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
+  const handleLogin = async () => {
+    if (!userid || !password) {
+      alert("Please enter both userid and password");
+      return;
     }
-    setCaptcha(result);
+
+    setIsLoading(true);
+    try {
+      await onLogin(userid, password);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  useEffect(() => {
-    generateCaptcha();
-  }, []);
-
-  const handleLogin = () => {
-    if (userCaptcha === captcha) {
-      onLogin(email, password);
-    } else {
-      alert("Invalid captcha. Please try again.");
-      generateCaptcha();
-      setUserCaptcha("");
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleLogin();
     }
   };
 
@@ -48,75 +43,62 @@ const Login = ({ onLogin, onShowSignup }: LoginProps) => {
       <div className="absolute inset-0 bg-black/60"></div>
 
       {/* Glass Container */}
-      <div className="relative w-[800px] h-[450px] grid grid-cols-2 rounded-2xl 
+      <div className="relative w-[800px] h-[400px] grid grid-cols-2 rounded-2xl 
       backdrop-blur-lg bg-[#171717]/80 border border-white/10 shadow-2xl">
 
         {/* Left Section */}
         <div className="flex items-center justify-center p-10 border-r border-white/10">
-          <div className="w-full max-w-sm space-y-4 text-white">
+          <div className="w-full max-w-sm space-y-6 text-white">
 
-            <h2 className="text-2xl font-bold">Login Credentials</h2>
+            <h2 className="text-3xl font-bold text-center">Login</h2>
 
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-3 rounded bg-[#171717]/60 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500/50"
-            />
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">User ID</label>
+                <input
+                  type="text"
+                  placeholder="Enter your User ID"
+                  value={userid}
+                  onChange={(e) => setUserid(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  className="w-full p-3 rounded bg-[#171717]/60 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500/50 transition-colors"
+                  disabled={isLoading}
+                />
+              </div>
 
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 rounded bg-[#171717]/60 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500/50"
-            />
-
-            {/* Captcha */}
-            <div className="flex justify-between items-center bg-[#171717]/60 p-2 rounded border border-white/10">
-              <span className="font-mono tracking-widest text-white">{captcha}</span>
-              <button onClick={generateCaptcha} className="text-blue-400 hover:text-blue-300 transition-colors">↻</button>
+              <div>
+                <label className="block text-sm font-medium mb-2">Password</label>
+                <input
+                  type="password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  className="w-full p-3 rounded bg-[#171717]/60 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500/50 transition-colors"
+                  disabled={isLoading}
+                />
+              </div>
             </div>
 
-            <input
-              type="text"
-              placeholder="Enter Captcha"
-              value={userCaptcha}
-              onChange={(e) => setUserCaptcha(e.target.value)}
-              className="w-full p-3 rounded bg-[#171717]/60 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500/50"
-            />
-
-            <button 
+            <button
               onClick={handleLogin}
-              className="w-full p-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg"
+              disabled={isLoading}
+              className="w-full p-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed font-medium"
             >
-              Login
+              {isLoading ? 'Logging in...' : 'Login'}
             </button>
-
-            <div className="text-center mt-4">
-              <p className="text-gray-400">
-                Don't have an account?{" "}
-                <button 
-                  onClick={onShowSignup}
-                  className="text-blue-400 hover:text-blue-300 font-semibold transition-colors"
-                >
-                  Sign Up
-                </button>
-              </p>
-            </div>
 
           </div>
         </div>
 
         {/* Right Section */}
-        <div className="flex items-center justify-center text-white text-xl font-semibold bg-contain" 
-        style={{
-        backgroundImage:
-          "url('https://codekeys.netlify.app/images/gif.gif')"
-        }}
+        <div className="flex items-center justify-center text-white text-xl font-semibold bg-contain"
+          style={{
+            backgroundImage:
+              "url('https://codekeys.netlify.app/images/gif.gif')"
+          }}
         >
-         
+
         </div>
 
       </div>

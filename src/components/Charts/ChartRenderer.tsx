@@ -96,33 +96,37 @@ export default function ChartRenderer({
       case 'bar':
         return (
           <ResponsiveContainer width="100%" height={height}>
-            <BarChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+            <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }} barSize={60}>
+              <CartesianGrid strokeDasharray="3 3" stroke={isDarkTheme ? '#374151' : '#e5e7eb'} vertical={false} />
               <XAxis 
                 dataKey={xKey} 
-                tick={{ fill: '#6B7280', fontSize: 12 }}
-                axisLine={{ stroke: '#E5E7EB' }}
+                tick={{ fill: isDarkTheme ? '#9ca3af' : '#6b7280', fontSize: 12 }}
+                axisLine={{ stroke: isDarkTheme ? '#374151' : '#e5e7eb' }}
+                tickLine={false}
               />
               <YAxis 
-                tick={{ fill: '#6B7280', fontSize: 12 }}
-                axisLine={{ stroke: '#E5E7EB' }}
+                tick={{ fill: isDarkTheme ? '#9ca3af' : '#6b7280', fontSize: 12 }}
+                axisLine={{ stroke: isDarkTheme ? '#374151' : '#e5e7eb' }}
+                tickLine={false}
               />
               <Tooltip 
                 contentStyle={{ 
-                  backgroundColor: '#FFFFFF', 
+                  backgroundColor: isDarkTheme ? '#1f2937' : '#ffffff',
                   border: '1px solid #E5E7EB',
                   borderRadius: '8px',
-                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                  color: isDarkTheme ? '#f3f4f6' : '#374151'
                 }}
+                cursor={{ fill: isDarkTheme ? '#374151' : '#f3f4f6', opacity: 0.4 }}
               />
-              <Legend />
-              <Bar dataKey={yKey} fill="#10B981" radius={[8, 8, 0, 0]} />
+              <Legend verticalAlign="bottom" height={36}/>
+              <Bar dataKey={yKey} fill="#4ade80" radius={[4, 4, 0, 0]} />
               {data[0] && Object.keys(data[0]).filter(key => key !== xKey && key !== yKey).map((key, index) => (
                 <Bar
                   key={key}
                   dataKey={key}
                   fill={COLORS[(index + 1) % COLORS.length]}
-                  radius={[8, 8, 0, 0]}
+                  radius={[4, 4, 0, 0]}
                 />
               ))}
             </BarChart>
@@ -137,13 +141,15 @@ export default function ChartRenderer({
                 data={data}
                 cx="50%"
                 cy="50%"
-                labelLine={false}
-                label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
+                innerRadius={60}
                 outerRadius={80}
                 fill="#8884d8"
+                dataKey={yKey}
+                paddingAngle={0}
+                stroke="none"
               >
                 {data.map((entry: any, index: number) => {
-                  const colors = isDarkTheme ? ['#3b82f6', '#8b5cf6', '#06b6d4', '#f59e0b'] : ['#3b82f6', '#8b5cf6', '#06b6d4', '#f59e0b']
+                  const colors = isDarkTheme ? ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b'] : ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b']
                   return <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
                 })}
               </Pie>
@@ -156,6 +162,7 @@ export default function ChartRenderer({
                   color: isDarkTheme ? '#f3f4f6' : '#374151'
                 }}
               />
+              <Legend verticalAlign="top" height={36}/>
             </PieChart>
           </ResponsiveContainer>
         )

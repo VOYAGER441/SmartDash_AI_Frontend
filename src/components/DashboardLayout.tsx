@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { BarChart3, MessageSquare, Settings, Menu, X, Upload } from 'lucide-react'
+import { BarChart3, MessageSquare, Settings, Menu, X, Upload, Bot } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 import LogoutButton from './LogoutButton'
 import AppSidebar from './AppSidebar'
@@ -52,16 +52,16 @@ export default function DashboardLayout({ children, onLogout, isDarkTheme, toggl
         border-r ${borderColor} shadow-2xl
         transform transition-transform duration-300 ease-in-out
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        lg:translate-x-0 lg:static lg:inset-0
+        lg:translate-x-0
         flex flex-col
       `}>
         {/* Sidebar header */}
         <div className={`flex items-center justify-between h-16 px-6 border-b ${borderColor} backdrop-blur-xl flex-shrink-0`}>
           <div className="flex items-center">
             <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-700 rounded-xl mr-3 flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-lg">Q</span>
+              <Bot className="w-7 h-7 text-white" />
             </div>
-            <span className={`text-xl font-bold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>Quibits</span>
+            <span className={`text-xl font-bold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>SmartDash AI</span>
           </div>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden p-2 rounded-lg hover:bg-white/10 transition-colors">
             <X className={`w-5 h-5 ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`} />
@@ -96,10 +96,10 @@ export default function DashboardLayout({ children, onLogout, isDarkTheme, toggl
               <Menu className={`w-5 h-5 ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`} />
             </button>
             <div className="flex-1 lg:flex-none">
-              <h1 className={`text-xl font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>Business Intelligence</h1>
+              <h1 className={`text-xl font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>New AI chat</h1>
             </div>
             <div className="flex items-center space-x-4">
-              <ThemeToggle isDarkTheme={isDarkTheme} onToggle={toggleTheme} size="md" variant="button" />
+              {/* <ThemeToggle isDarkTheme={isDarkTheme} onToggle={toggleTheme} size="md" variant="button" /> */}
             </div>
           </div>
         </div>

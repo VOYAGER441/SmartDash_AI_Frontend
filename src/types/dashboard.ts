@@ -18,7 +18,7 @@ export interface IChartDataPoint {
   [key: string]: string | number;
 }
 
-export type ChartType = "metric" | "line" | "bar" | "pie" | "donut" | "area";
+export type ChartType = "metric" | "line" | "bar" | "pie" | "donut" | "area" | "scatter" | "table";
 
 export interface IChart {
   id: string;
@@ -27,6 +27,7 @@ export interface IChart {
   sql: string;
   config: IChartConfig | IMetricConfig;
   data: IChartDataPoint[];
+  error?: string;
 }
 
 export interface IDashboard {

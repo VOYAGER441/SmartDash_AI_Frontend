@@ -5,13 +5,16 @@ import { useRouter } from 'next/navigation'
 import DashboardLayout from '@/components/DashboardLayout'
 import Dashboard from '@/components/Dashboard'
 import ChatInterface from '@/components/ChatInterface'
-// import ChatDetails from '@/components/ChatDetails'
 import { IChart, IDashboardData } from '@/types/dashboard'
+import { IDatasetMetadata } from '@/lib/api'
 
 export default function DashboardPage() {
   const [isDarkTheme, setIsDarkTheme] = useState(true)
   const [currentView, setCurrentView] = useState<'dashboard' | 'chat'>('chat')
   const [dashboardData, setDashboardData] = useState<IDashboardData | null>(null)
+  const [datasetId, setDatasetId] = useState<string | null>(null)
+  const [sessionId, setSessionId] = useState<string | null>(null)
+  const [pendingQuery, setPendingQuery] = useState<string | null>(null)
   const router = useRouter()
 
   const handleLogout = () => {
@@ -19,19 +22,34 @@ export default function DashboardPage() {
   }
 
   const handleChartsGenerated = (charts: IChart[]) => {
-    // Generate a default IDashboardData using the charts from the event
-    setDashboardData({
-      sessionId: 'generated-' + Date.now(),
+    setDashboardData(prev => ({
+      sessionId: prev?.sessionId || sessionId || 'generated-' + Date.now(),
       dashboard: {
-        title: 'Generated Dashboard',
+        title: prev?.dashboard?.title || 'Generated Dashboard',
         charts: charts,
-        insights: 'These insights were generated automatically based on the newly created charts.'
-      }
-    })
+        insights: prev?.dashboard?.insights || 'These insights were generated from your data.',
+      },
+    }))
     setCurrentView('dashboard')
   }
 
+  const handleDatasetUploaded = (metadata: IDatasetMetadata) => {
+    setDatasetId(metadata.id)
+    // Reset session when new dataset is uploaded
+    setSessionId(null)
+    setDashboardData(null)
+  }
+
+  const handleSessionCreated = (newSessionId: string) => {
+    setSessionId(newSessionId)
+  }
+
   const toggleTheme = () => setIsDarkTheme(!isDarkTheme)
+
+  const handleActionClick = (query: string) => {
+    setPendingQuery(query + '-' + Date.now()) // append timestamp to ensure useEffect fires even for same query
+    setCurrentView('chat')
+  }
 
   return (
     <div className={`min-h-screen ${isDarkTheme ? 'bg-black' : 'bg-white'}`}>
@@ -59,12 +77,21 @@ export default function DashboardPage() {
             ))}
           </div>
 
+          {/* Dataset indicator */}
+          {datasetId && (
+            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-mono ${isDarkTheme ? 'bg-[#2A3F33]/20 text-[#4ADE80] border border-[#2A3F33]/50' : 'bg-green-100 text-green-700 border border-green-300'}`}>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#4ADE80]" />
+              Dataset: {datasetId.slice(0, 8)}...
+            </div>
+          )}
+
           {/* Dashboard */}
           {currentView === 'dashboard' && (
             <Dashboard
               isDarkTheme={isDarkTheme}
               dashboardData={dashboardData}
-              sessionId={dashboardData?.sessionId}
+              sessionId={dashboardData?.sessionId || sessionId || undefined}
+              onActionClick={handleActionClick}
             />
           )}
 
@@ -75,12 +102,14 @@ export default function DashboardPage() {
               <div className="flex-1 min-w-0">
                 <ChatInterface
                   isDarkTheme={isDarkTheme}
+                  datasetId={datasetId}
+                  sessionId={sessionId}
                   onChartsGenerated={handleChartsGenerated}
+                  onDatasetUploaded={handleDatasetUploaded}
+                  onSessionCreated={handleSessionCreated}
+                  initialQuery={pendingQuery}
                 />
               </div>
-
-              {/* Chat Details panel */}
-
             </div>
           )}
         </div>

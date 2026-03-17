@@ -1,16 +1,21 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Upload, X, FileText, CheckCircle } from 'lucide-react'
+import { Upload, X, FileText, CheckCircle, Loader2, AlertCircle } from 'lucide-react'
+import { uploadDataset, IDatasetMetadata } from '../lib/api'
 
 interface CSVUploadProps {
-  onUpload: (file: File) => void
+  onUpload?: (file: File) => void
+  onUploadComplete?: (metadata: IDatasetMetadata) => void
   isDarkTheme: boolean
 }
 
-export default function CSVUpload({ onUpload, isDarkTheme }: CSVUploadProps) {
+export default function CSVUpload({ onUpload, onUploadComplete, isDarkTheme }: CSVUploadProps) {
   const [isDragging, setIsDragging] = useState(false)
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const [metadata, setMetadata] = useState<IDatasetMetadata | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -26,7 +31,7 @@ export default function CSVUpload({ onUpload, isDarkTheme }: CSVUploadProps) {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
     setIsDragging(false)
-    
+
     const files = e.dataTransfer.files
     if (files && files[0]) {
       handleFile(files[0])
@@ -40,17 +45,34 @@ export default function CSVUpload({ onUpload, isDarkTheme }: CSVUploadProps) {
     }
   }
 
-  const handleFile = (file: File) => {
-    if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
-      setUploadedFile(file)
-      onUpload(file)
-    } else {
-      alert('Please upload a valid CSV file')
+  const handleFile = async (file: File) => {
+    if (!(file.type === 'text/csv' || file.name.endsWith('.csv'))) {
+      setUploadError('Please upload a valid CSV file')
+      return
+    }
+
+    setUploadedFile(file)
+    setUploadError(null)
+    setIsUploading(true)
+    if (onUpload) onUpload(file)
+
+    try {
+      const response = await uploadDataset(file)
+      setMetadata(response.data)
+      setIsUploading(false)
+      if (onUploadComplete) onUploadComplete(response.data)
+    } catch (err) {
+      setIsUploading(false)
+      setUploadError((err as Error).message)
+      setUploadedFile(null)
+      setMetadata(null)
     }
   }
 
   const removeFile = () => {
     setUploadedFile(null)
+    setMetadata(null)
+    setUploadError(null)
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
@@ -66,9 +88,10 @@ export default function CSVUpload({ onUpload, isDarkTheme }: CSVUploadProps) {
           </div>
           <button
             onClick={() => fileInputRef.current?.click()}
-            className={`px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl`}
+            disabled={isUploading}
+            className={`px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed`}
           >
-            Select File
+            {isUploading ? 'Uploading...' : 'Select File'}
           </button>
         </div>
 
@@ -80,7 +103,36 @@ export default function CSVUpload({ onUpload, isDarkTheme }: CSVUploadProps) {
           className="hidden"
         />
 
-        {uploadedFile ? (
+        {/* Error message */}
+        {uploadError && (
+          <div className={`mb-4 p-4 rounded-xl border flex items-start gap-3 ${isDarkTheme ? 'bg-red-900/20 border-red-500/30 text-red-300' : 'bg-red-50 border-red-300 text-red-700'}`}>
+            <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-sm font-medium">Upload failed</p>
+              <p className="text-xs mt-1">{uploadError}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Uploading state */}
+        {isUploading && (
+          <div className={`p-6 rounded-xl border ${isDarkTheme ? 'bg-blue-500/10 border-blue-400/30' : 'bg-blue-50 border-blue-300'} shadow-lg`}>
+            <div className="flex items-center gap-4">
+              <Loader2 className={`w-8 h-8 animate-spin ${isDarkTheme ? 'text-blue-400' : 'text-blue-600'}`} />
+              <div>
+                <p className={`font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-900'} text-lg`}>
+                  {uploadedFile?.name}
+                </p>
+                <p className={`${isDarkTheme ? 'text-gray-400' : 'text-gray-600'} text-sm`}>
+                  Uploading and processing CSV file...
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Success state */}
+        {!isUploading && metadata && uploadedFile ? (
           <div className={`p-6 rounded-xl border ${isDarkTheme ? 'bg-green-500/20 border-green-400/30' : 'bg-green-50 border-green-300'} shadow-lg`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center">
@@ -88,9 +140,12 @@ export default function CSVUpload({ onUpload, isDarkTheme }: CSVUploadProps) {
                   <CheckCircle className="w-6 h-6 text-green-400" />
                 </div>
                 <div>
-                  <p className={`font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-900'} text-lg`}>{uploadedFile.name}</p>
+                  <p className={`font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-900'} text-lg`}>{metadata.originalName}</p>
                   <p className={`${isDarkTheme ? 'text-gray-400' : 'text-gray-600'} text-sm`}>
-                    {(uploadedFile.size / 1024).toFixed(1)} KB • CSV file
+                    {metadata.rowCount} rows • {metadata.columns.length} columns • CSV file
+                  </p>
+                  <p className={`${isDarkTheme ? 'text-gray-500' : 'text-gray-500'} text-xs mt-1`}>
+                    Columns: {metadata.columns.map(c => c.name).join(', ')}
                   </p>
                 </div>
               </div>
@@ -102,7 +157,7 @@ export default function CSVUpload({ onUpload, isDarkTheme }: CSVUploadProps) {
               </button>
             </div>
           </div>
-        ) : (
+        ) : !isUploading && (
           <div
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}

@@ -9,9 +9,10 @@ interface DashboardProps {
   isDarkTheme: boolean
   dashboardData: IDashboardData | null
   sessionId?: string
+  onActionClick?: (query: string) => void
 }
 
-export default function Dashboard({ isDarkTheme, dashboardData, sessionId }: DashboardProps) {
+export default function Dashboard({ isDarkTheme, dashboardData, sessionId, onActionClick }: DashboardProps) {
   if (!dashboardData) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -135,6 +136,7 @@ export default function Dashboard({ isDarkTheme, dashboardData, sessionId }: Das
           {['Growth analysis', 'Peak month deep-dive', 'Margin vs volume'].map(btn => (
             <button
               key={btn}
+              onClick={() => onActionClick?.(btn)}
               className={`flex items-center gap-2 px-4 py-2 text-sm rounded-lg border transition-colors ${isDarkTheme
                 ? 'bg-transparent border-[#404040] text-gray-300 hover:bg-[#333333]'
                 : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
